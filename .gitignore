@@ -9,6 +9,11 @@ dist/
 web-build/
 expo-env.d.ts
 
+.idea
+
+backend/src/generated/prisma
+
+
 # Native
 .kotlin/
 *.orig.*
