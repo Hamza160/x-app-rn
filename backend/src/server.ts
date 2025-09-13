@@ -1,11 +1,10 @@
-import "dotenv/config"
-import express, {Express} from "express";
+import {ENV} from "./config/env";
+import express, {Express, Request, Response} from "express";
 
-const app:Express = express();
+const app: Express = express();
 
-const PORT = process.env.PORT || 3000;
-const NODE_ENV = process.env.NODE_ENV || 'development';
-
-app.listen(PORT, () => {
-    console.log(`Server started on port http://localhost:${PORT}`);
+app.get("/", (req: Request, res: Response) => {
+    return res.send("Hello World!");
 });
+
+app.listen(9000, () => console.log(`Server started on port http://localhost:${ENV.PORT}`));
