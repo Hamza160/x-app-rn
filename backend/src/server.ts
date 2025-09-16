@@ -4,6 +4,7 @@ import express, {type Express, Request, Response} from "express";
 import cors from "cors";
 import {clerkMiddleware} from '@clerk/express'
 import userRoutes from "./routes/user.route";
+import postRoutes from "./routes/post.route";
 
 const app: Express = express();
 
@@ -14,6 +15,7 @@ app.use(clerkMiddleware())
 
 // Routes
 app.use('/api/users', userRoutes)
+app.use('/api/posts', postRoutes)
 
 app.get("/", (req: Request, res: Response) => {
     return res.send("Hello World!");
