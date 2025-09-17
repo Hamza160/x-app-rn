@@ -12,7 +12,7 @@ export function notFound(req: Request, res: Response, next: NextFunction) {
     next(error);
 }
 
-export function errorHandler(
+export function errorHandlerMiddleware(
     err: AppError,
     req: Request,
     res: Response,
