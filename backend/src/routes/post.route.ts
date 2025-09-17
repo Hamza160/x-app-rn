@@ -2,7 +2,6 @@ import {Router} from "express";
 import {protectRoute} from "../middleware/auth.middleware";
 import * as postController from "../controllers/post.controller";
 import upload from "../middleware/upload.middleware";
-import {likePost} from "../controllers/post.controller";
 const router = Router();
 
 router.get("/user/:username", postController.getUserPosts);
