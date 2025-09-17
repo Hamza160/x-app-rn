@@ -3,6 +3,7 @@ import {Request, Response} from "express";
 import expressAsyncHandler from "express-async-handler";
 import {getAuth} from "@clerk/express";
 import cloudinary from "../config/cloudinary";
+import {User} from '../generated/prisma'
 
 // Get all posts with users and comments with their users
 export const getPosts = expressAsyncHandler(async (req: Request, res: Response) => {
@@ -38,7 +39,7 @@ export const getPost = expressAsyncHandler(async (req: Request, res: Response) =
     })
 
     if (!post) {
-         res.status(404).json({message: "Post not found"})
+        res.status(404).json({message: "Post not found"})
         return
     }
 
@@ -84,33 +85,33 @@ export const createPost = expressAsyncHandler(async (req: Request, res: Response
     const {content} = req.body
     const imageFile = req.file;
 
-    if(!content || !imageFile) {
+    if (!content || !imageFile) {
         res.status(400).json({error: "Post must contain image or content"})
         return
     }
 
-    const user = await db.user.findUnique({where:{clerkId:userId}})
-    if(!user) {
+    const user = await db.user.findUnique({where: {clerkId: userId}})
+    if (!user) {
         res.status(400).json({error: "User not found"})
         return
     }
 
     let imageUrl = ""
 
-    if(imageFile) {
+    if (imageFile) {
         try {
             const base64Image = `data:${imageFile.mimetype};base64,${imageFile.buffer.toString('base64')}`;
             const uploadResponse = await cloudinary.uploader.upload(base64Image, {
-                folder:"social_media_posts",
-                resource_type:"image",
-                transformation:[
-                    {width:800, height:600, crop:"limit"},
-                    {quality:"auto"},
-                    {format:"auto"}
+                folder: "social_media_posts",
+                resource_type: "image",
+                transformation: [
+                    {width: 800, height: 600, crop: "limit"},
+                    {quality: "auto"},
+                    {format: "auto"}
                 ]
             });
             imageUrl = uploadResponse.secure_url;
-        }catch(uploadError) {
+        } catch (uploadError) {
             console.error("Cloudinary upload error:", uploadError)
             res.status(400).json({error: "Failed to upload image"})
             return
@@ -118,12 +119,99 @@ export const createPost = expressAsyncHandler(async (req: Request, res: Response
     }
 
     const post = await db.post.create({
-        data:{
-            userId:user.id,
+        data: {
+            userId: user.id,
             content,
-            image:imageUrl,
+            image: imageUrl,
         }
     })
 
     res.status(201).json({post})
+})
+
+export const deletePost = expressAsyncHandler(async (req: Request, res: Response) => {
+    const {postId} = req.params
+    const {userId} = getAuth(req)
+
+    const user = await db.user.findUnique({where: {clerkId: userId}});
+    if (!user) {
+        res.status(401).json({message: "Not authorized"});
+        return;
+    }
+
+    const post = await db.post.findUnique({where: {id: postId}, select: {userId: true}});
+    if (!post) {
+        res.status(404).json({message: "Post not found"});
+        return;
+    }
+    if (post.userId !== user.id) {
+        res.status(403).json({message: "You do not have permission to delete this post"});
+        return;
+    }
+
+    await db.like.deleteMany({where: {postId: postId}});
+    await db.comment.deleteMany({where: {postId: postId}});
+
+    await db.post.deleteMany({
+        where: {id: postId, userId: user.id},
+    });
+
+    res.status(200).json({message: "Post deleted successfully"});
+});
+
+export const likePost = expressAsyncHandler(async (req: Request, res: Response) => {
+    const {postId} = req.params
+    const {userId} = getAuth(req)
+
+    const post = await db.post.findUnique({
+        where: {
+            id: postId,
+        }
+    })
+
+    const user = await db.user.findUnique({where: {clerkId: userId}})
+
+    if (!post || !user) {
+        res.status(404).json({message: "Post not found"})
+        return
+    }
+
+    const isLiked = post.likes.toString(
+        (like: User) => like.userId === user.id
+    )
+
+    if (isLiked) {
+        await db.post.update({
+            where: {id: post.id},
+            data: {
+                likes: {
+                    disconnect: {userId: user.id},
+                },
+            },
+        });
+    } else {
+        await db.post.update({
+            where: {id: post.id},
+            data: {
+                likes: {
+                    connect: {userId: user.id},
+                },
+            },
+        });
+
+        if (post.userId !== user.id) {
+            await db.notification.create({
+                data: {
+                    from: user.id,
+                    to: post.user,
+                    type: 'like',
+                    post: postId
+                }
+            })
+        }
+    }
+
+    res.status(200).json({message: !isLiked ? "Post liked successfully" : "Post unliked successfully"})
+
+
 })

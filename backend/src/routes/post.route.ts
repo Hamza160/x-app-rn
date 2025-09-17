@@ -2,12 +2,18 @@ import {Router} from "express";
 import {protectRoute} from "../middleware/auth.middleware";
 import * as postController from "../controllers/post.controller";
 import upload from "../middleware/upload.middleware";
+import {likePost} from "../controllers/post.controller";
 const router = Router();
 
-router.get("/:postId", postController.getPosts);
 router.get("/user/:username", postController.getUserPosts);
 
 router.route('/')
     .get(postController.getPosts)
     .post(protectRoute, upload.single('image'), postController.createPost);
+
+router.route("/:postId")
+    .get(postController.getPosts)
+    .delete(protectRoute, postController.deletePost);
+
+router.post("/:postId/like", postController.likePost);
 export default router;

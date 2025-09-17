@@ -5,6 +5,7 @@ import cors from "cors";
 import {clerkMiddleware} from '@clerk/express'
 import userRoutes from "./routes/user.route";
 import postRoutes from "./routes/post.route";
+import {errorHandler, notFound} from "./middleware/errorHandler";
 
 const app: Express = express();
 
@@ -20,5 +21,8 @@ app.use('/api/posts', postRoutes)
 app.get("/", (req: Request, res: Response) => {
     return res.send("Hello World!");
 });
+
+app.use(notFound);
+app.use(errorHandler);
 
 app.listen(ENV.PORT, () => console.log(`Server started on port http://localhost:${ENV.PORT}`));
