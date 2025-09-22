@@ -3,28 +3,15 @@ import React from 'react'
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Feather} from "@expo/vector-icons";
 
+// TODO:: Add this screen
+
 const TRENDING_TOPICS = [
     {topic:"#ReactNative", tweets:"125k"},
     {topic:"#TypeScript", tweets:"89k"},
     {topic:"#WebDevelopment", tweets:"234k"},
     {topic:"#AI", tweets:"567k"},
     {topic:"#TechNews", tweets:"98k"},  {topic:"#ReactNative", tweets:"125k"},
-    {topic:"#TypeScript", tweets:"89k"},
-    {topic:"#WebDevelopment", tweets:"234k"},
-    {topic:"#AI", tweets:"567k"},
-    {topic:"#TechNews", tweets:"98k"},  {topic:"#ReactNative", tweets:"125k"},
-    {topic:"#TypeScript", tweets:"89k"},
-    {topic:"#WebDevelopment", tweets:"234k"},
-    {topic:"#AI", tweets:"567k"},
-    {topic:"#TechNews", tweets:"98k"},  {topic:"#ReactNative", tweets:"125k"},
-    {topic:"#TypeScript", tweets:"89k"},
-    {topic:"#WebDevelopment", tweets:"234k"},
-    {topic:"#AI", tweets:"567k"},
-    {topic:"#TechNews", tweets:"98k"},  {topic:"#ReactNative", tweets:"125k"},
-    {topic:"#TypeScript", tweets:"89k"},
-    {topic:"#WebDevelopment", tweets:"234k"},
-    {topic:"#AI", tweets:"567k"},
-    {topic:"#TechNews", tweets:"98k"},
+
 ]
 
 export default function SearchScreen() {
